@@ -9,15 +9,73 @@ Y coord goes from top to bottom, counting up
 Added multiple axes of different sizes
 */
 
-//helper functions
-//int UpdateCircleLeftEdge(int cx, int cs);
-//int UpdateCircleRightEdge(int cx, int cs);
-//int UpdateCircleTopEdge(int cy, int cs);
-//int UpdateCircleBotEdge(int cy, int cs);
-//int UpdateRectLeftEdge(int rx);
-//int UpdateRectRightEdge(int rx, int rsx);
-//int UpdateRectTopEdge(int ry);
-//int UpdateRectBotEdge(int ry, int rsy);
+
+//the rectangles, but as a class
+class Axe
+{
+protected:
+    int axeSizeX, axeSizeY; //size
+    int axeX, axeY; //position
+    int axeDirection; //for movement
+    int axeLeftEdge, axeRightEdge, axeTopEdge, axeBotEdge; //collision edges
+public:
+    Axe()
+    {
+        axeSizeX = 30;
+        axeSizeY = 50;
+        axeX = 0;
+        axeY = 0;
+        axeDirection = 10;
+        axeLeftEdge = axeX;
+        axeRightEdge = axeX + axeSizeX;
+        axeTopEdge = axeY;
+        axeBotEdge = axeY + axeSizeY;
+    }
+    Axe(int sizeX, int sizeY, int posX, int posY)
+    {
+        axeSizeX = sizeX;
+        axeSizeY = sizeY;
+        axeX = posX;
+        axeY = posY;
+        axeDirection = 10;
+        axeLeftEdge = axeX;
+        axeRightEdge = axeX + axeSizeX;
+        axeTopEdge = axeY;
+        axeBotEdge = axeY + axeSizeY;
+    }
+    int GetAxeX() { return axeX; }
+    int GetAxeY() { return axeY; }
+    int GetAxeSizeX() { return axeSizeX; }
+    int GetAxeSizeY() { return axeSizeY; }
+    int GetAxeLeftEdge() { return axeLeftEdge; }
+    int GetAxeRightEdge() { return axeRightEdge; }
+    int GetAxeTopEdge() { return axeTopEdge; }
+    int GetAxeBotEdge() { return axeBotEdge; }
+    int GetAxeDirection() { return axeDirection; }
+    void SetAxeDirection(int newDirection) { axeDirection = newDirection; }
+    bool IsOutofBounds(int upperBounds, int lowerBounds)
+    {
+        if(axeY > upperBounds || axeY < lowerBounds)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    void UpdatePosition()
+    {
+        axeY += axeDirection;
+    }
+    void UpdateCollisions()
+    {
+        axeLeftEdge = axeX;
+        axeRightEdge = axeX + axeSizeX;
+        axeTopEdge = axeY;
+        axeBotEdge = axeY + axeSizeY;
+    }
+};
 
 int main()
 {
@@ -30,6 +88,8 @@ int main()
     int circleRightEdge{circleX+int(circleSize)};
     int circleTopEdge{circleY-int(circleSize)};
     int circleBotEdge{circleY+int(circleSize)};
+    // axe info
+    Axe axe1(30, 50, sizeX-200, 0);
     // rect info (the axe, drawn from top left corner), {} is called braced initialization in this instance
     int rectSizeX{50}; int rectSizeY{50};
     int rectX{sizeX/2}; int rectY{0}; //position
@@ -65,15 +125,22 @@ int main()
         else
         {
             // game logic here
+            
+            //the player
             DrawCircle(circleX, circleY, circleSize, WHITE);
-            DrawRectangle(rectX, rectY, rectSizeX, rectSizeY, axeColor);
 
-            //move the axe
-            rectY += direction;
-            //determine directon
-            if(rectY > sizeY || rectY < 0)
+            //the axes
+            DrawRectangle(axe1.GetAxeX(), axe1.GetAxeY(), axe1.GetAxeSizeX(), axe1.GetAxeSizeY(), axeColor);
+
+            //move the axes
+            axe1.UpdatePosition();
+            //rectY += direction;
+
+            //determine axe directons
+            if(axe1.IsOutofBounds(sizeY, 0))
             {
-                direction = -direction; //'-' in front inverses the number
+                axe1.SetAxeDirection(-axe1.GetAxeDirection());
+                //direction = -direction; //'-' in front inverses the number
             }
 
 
@@ -92,16 +159,18 @@ int main()
             circleLeftEdge = circleX - circleSize;
             circleRightEdge = circleX + circleSize;
             circleTopEdge = circleY - circleSize;
-            circleBotEdge = circleY + circleSize;            
-            rectLeftEdge = rectX;
-            rectRightEdge = rectX + rectSizeX;
-            rectTopEdge = rectY;
-            rectBotEdge = rectY + rectSizeY;
+            circleBotEdge = circleY + circleSize;
+            axe1.UpdateCollisions();
+
+            //rectLeftEdge = rectX;
+            //rectRightEdge = rectX + rectSizeX;
+            //rectTopEdge = rectY;
+            //rectBotEdge = rectY + rectSizeY;
 
             //check for collisions only when circle can potentially overlap with axe vertically
-            if(circleRightEdge > rectLeftEdge && circleLeftEdge < rectRightEdge)
+            if(circleRightEdge > axe1.GetAxeLeftEdge() && circleLeftEdge < axe1.GetAxeRightEdge())
             {
-                if(circleTopEdge < rectBotEdge && circleBotEdge > rectTopEdge)
+                if(circleTopEdge < axe1.GetAxeBotEdge() && circleBotEdge > axe1.GetAxeTopEdge())
                 {
                     bCollisionWithAxe = true;
                 }
