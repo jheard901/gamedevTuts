@@ -1,14 +1,36 @@
 
 #include "raylib.h"
 
+#include <sstream>
+
 /*
 Note:
 X coord goes from left to right, counting up
 Y coord goes from top to bottom, counting up
 
 Added multiple axes of different sizes
+Can retry on losing
+Needs a win condition, like maybe after x time passes, then you win.
 */
 
+//a timer (from FAQ: https://github.com/raysan5/raylib/wiki/Frequently-Asked-Questions#how-do-i-make-a-timer)
+typedef struct Timer {
+    double startTime;   // Start time (seconds)
+    double lifeTime;    // Lifetime (seconds)
+} Timer;
+void StartTimer(Timer *timer, double lifetime)
+{
+    timer->startTime = GetTime();
+    timer->lifeTime = lifetime;
+}
+double GetElapsed(Timer timer)
+{
+    return GetTime() - timer.startTime;
+}
+bool IsTimerDone(Timer timer)
+{
+    return GetTime() - timer.startTime >= timer.lifeTime;
+}
 
 //the rectangles, but as a class
 class Axe
@@ -107,11 +129,14 @@ int main()
     Color axeColor{120, 190, 190, 255};
 
     // game vars {} is called braced initialization
+    Timer gameTime;
+    std::stringstream elapsedTime;
     bool bCollisionWithAxe{false};
     int gameOverFontSize = 40;
 
     InitWindow(sizeX, sizeY, "me axe game");
     SetTargetFPS(60);
+    StartTimer(&gameTime, 0);
 
     while (!WindowShouldClose())
     {
@@ -140,7 +165,16 @@ int main()
         else
         {
             // game logic here
+
+            //elapsed time | solution from: https://stackoverflow.com/questions/6404586/double-to-const-char
+
+            //so, just realized the function DrawText exists which functions like sprintf
+            //refer to video for timer usage: https://www.youtube.com/watch?v=vGlvTWUctTQ
+            elapsedTime << GetElapsed(gameTime);
+            const char* elapsedTimeStr = elapsedTime.str().c_str();
+            DrawText(elapsedTimeStr, int(sizeX*0.75), int(sizeY*0.9), gameOverFontSize/2, BLACK);
             
+
             //the player
             DrawCircle(circleX, circleY, circleSize, WHITE);
 
@@ -218,4 +252,5 @@ int main()
         //remove frame
         EndDrawing();
     }
+
 }
