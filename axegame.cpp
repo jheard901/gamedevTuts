@@ -81,9 +81,11 @@ protected:
     double axeX; int axeY; //position
     int axeDirection; //for up/down movement
     float axeSpeed; //for left/right movement
+    int qSize; int qDirection; float qSpeed; //for queuing values to change
     int isx, isy, ix, iy, id; float is; //initial values    
     int axeLeftEdge, axeRightEdge, axeTopEdge, axeBotEdge; //collision edges
     bool bOffscreen;
+    bool bQueued; //true if requested to change size, speed, or direction
 public:
     Axe()
     {
@@ -94,11 +96,13 @@ public:
         axeY = iy;
         axeDirection = id;
         axeSpeed = is;
+        qSize = 0; qDirection = 0; qSpeed = 0;
         axeLeftEdge = axeX;
         axeRightEdge = axeX + axeSizeX;
         axeTopEdge = axeY;
         axeBotEdge = axeY + axeSizeY;
         bOffscreen = true;
+        bQueued = true;
     }
     Axe(int sizeX, int sizeY, int posX, int posY, int dir, float spd)
     {
@@ -109,11 +113,13 @@ public:
         axeY = iy;
         axeDirection = id;
         axeSpeed = is;
+        qSize = 0; qDirection = 0; qSpeed = 0;
         axeLeftEdge = axeX;
         axeRightEdge = axeX + axeSizeX;
         axeTopEdge = axeY;
         axeBotEdge = axeY + axeSizeY;
         bOffscreen = true;
+        bQueued = true;
     }
     double GetAxeX() { return axeX; }
     int GetAxeY() { return axeY; }
@@ -126,9 +132,11 @@ public:
     int GetAxeDirection() { return axeDirection; }
     float GetAxeSpeed() { return axeSpeed; }
     bool GetAxeOffscreen() { return bOffscreen; }    
+    void SetAxeSize(int sizeX) { axeSizeX = sizeX; }
     void SetAxeDirection(int newDirection) { axeDirection = newDirection; }
     void SetAxeSpeed(float newSpeed) { axeSpeed = newSpeed; }
     void SetAxeOffscreen(bool val) { bOffscreen = val; }
+    bool IsQueued() { return bQueued; }
     bool IsOutofBounds(int upperBounds, int lowerBounds)
     {
         if(axeY > upperBounds || axeY < lowerBounds)
@@ -150,7 +158,7 @@ public:
         {
              return false;
         }
-    }
+    }    
     void UpdatePosition()
     {
         axeX += axeSpeed;
@@ -163,6 +171,23 @@ public:
         axeTopEdge = axeY;
         axeBotEdge = axeY + axeSizeY;
     }
+    void SetAxeQueue(int size, int direction, float speed)
+    {
+        //create queue variables to store these and then
+        //create an execute queue function that does the
+        //changes
+        qSize = size;
+        qDirection = direction;
+        qSpeed = speed;
+        bQueued = true;
+    }
+    void ExecuteAxeQueue()
+    {
+        axeSizeX = qSize;
+        axeDirection = qDirection;
+        axeSpeed = qSpeed;
+        bQueued = false;
+    }
     void Reset()
     {
         axeSizeX = isx;
@@ -172,6 +197,7 @@ public:
         axeDirection = id;
         axeSpeed = is;
         bOffscreen = true;
+        bQueued = true;
     }
     void ResetPos() { axeX = ix; axeY = iy; }
 };
@@ -196,16 +222,16 @@ int main()
     int MAX_AXE_WIDTH = 120, MIN_AXE_WIDTH = 4; //horizontal size
     float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-1.0 is too fast, -0.08 feels too slow
     int MAX_AXE_DIRECTION = 10;
-    Axe axe1(MAX_AXE_WIDTH-100, AXE_SIZE, sizeX+MIN_AXE_WIDTH, 0, 0, 0);
-    Axe axe2(MAX_AXE_WIDTH-80, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, 0, 0, 0);
-    Axe axe3(MAX_AXE_WIDTH-60, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, 0, 0, 0);
-    Axe axe4(MAX_AXE_WIDTH-40, AXE_SIZE, sizeX+MIN_AXE_WIDTH*4, 0, 0, 0);
-    Axe axe5(MAX_AXE_WIDTH-20, AXE_SIZE, sizeX+MIN_AXE_WIDTH*5, 0, 0, 0);
-    Axe axe6(MAX_AXE_WIDTH-100, AXE_SIZE, sizeX+MIN_AXE_WIDTH, sizeY, 0, 0);
-    Axe axe7(MAX_AXE_WIDTH-80, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, sizeY, 0, 0);
-    Axe axe8(MAX_AXE_WIDTH-60, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, sizeY, 0, 0);
-    Axe axe9(MAX_AXE_WIDTH-40, AXE_SIZE, sizeX+MIN_AXE_WIDTH*4, sizeY, 0, 0);
-    Axe axe10(MAX_AXE_WIDTH-20, AXE_SIZE, sizeX+MIN_AXE_WIDTH*5, sizeY, 0, 0);
+    Axe axe1(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH, 0, 0, 0);
+    Axe axe2(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, 0, 0, 0);
+    Axe axe3(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, 0, 0, 0);
+    Axe axe4(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*4, 0, 0, 0);
+    Axe axe5(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*5, 0, 0, 0);
+    Axe axe6(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH, sizeY, 0, 0);
+    Axe axe7(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, sizeY, 0, 0);
+    Axe axe8(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, sizeY, 0, 0);
+    Axe axe9(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*4, sizeY, 0, 0);
+    Axe axe10(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*5, sizeY, 0, 0);
     Color axeColor{150, 190, 130, 255};
 
     // game vars | {} is called braced initialization
@@ -290,7 +316,13 @@ int main()
                 DrawRectangle(axe1.GetAxeX(), axe1.GetAxeY(), axe1.GetAxeSizeX(), axe1.GetAxeSizeY(), axeColor);
                 DrawRectangle(axe2.GetAxeX(), axe2.GetAxeY(), axe2.GetAxeSizeX(), axe2.GetAxeSizeY(), axeColor);
                 DrawRectangle(axe3.GetAxeX(), axe3.GetAxeY(), axe3.GetAxeSizeX(), axe3.GetAxeSizeY(), axeColor);
-
+                DrawRectangle(axe4.GetAxeX(), axe4.GetAxeY(), axe4.GetAxeSizeX(), axe4.GetAxeSizeY(), axeColor);
+                DrawRectangle(axe5.GetAxeX(), axe5.GetAxeY(), axe5.GetAxeSizeX(), axe5.GetAxeSizeY(), axeColor);
+                DrawRectangle(axe6.GetAxeX(), axe6.GetAxeY(), axe6.GetAxeSizeX(), axe6.GetAxeSizeY(), axeColor);
+                DrawRectangle(axe7.GetAxeX(), axe7.GetAxeY(), axe7.GetAxeSizeX(), axe7.GetAxeSizeY(), axeColor);
+                DrawRectangle(axe8.GetAxeX(), axe8.GetAxeY(), axe8.GetAxeSizeX(), axe8.GetAxeSizeY(), axeColor);
+                DrawRectangle(axe9.GetAxeX(), axe9.GetAxeY(), axe9.GetAxeSizeX(), axe9.GetAxeSizeY(), axeColor);
+                DrawRectangle(axe10.GetAxeX(), axe10.GetAxeY(), axe10.GetAxeSizeX(), axe10.GetAxeSizeY(), axeColor);
 
                 //check phase based off timer.lifeTime                
                 if(gameTime.lifeTime < 45.0 && gamePhase == Phase::ONE)
@@ -328,46 +360,64 @@ int main()
                 //once axe is offscreen it can be updated to match
                 //size/speed for its next phase
 
+                //set size, direction, and speed for each phase
+                if(bStartNextPhase)
+                {
+                    switch (gamePhase)
+                    {
+                        case Phase::ONE:
+                            //do stuff
+                            axe1.SetAxeQueue(MAX_AXE_WIDTH-40, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*4);
+                            
+                            bStartNextPhase = false;
+                            break;
+                        case Phase::TWO:
+                            //do stuff
+                            axe1.SetAxeQueue(MAX_AXE_WIDTH, MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
+                            bStartNextPhase = false;
+                            break;
+                        case Phase::THREE:
+                            //do stuff
+                            bStartNextPhase = false;
+                            break;
+                        case Phase::FOUR:
+                            //do stuff
+                            bStartNextPhase = false;
+                            break;
+                        default:
+                            //do stuff
+                            break;
+                    }   
+                }
+
                 if(axe1.GetAxeOffscreen())
                 {
-                    //set size, direction, and speed for each phase
-                    if(bStartNextPhase)
+                    if(axe1.IsQueued())
                     {
-                        switch (gamePhase)
-                        {
-                            case Phase::ONE:
-                                //do stuff
-                                axe1.SetAxeDirection(MAX_AXE_DIRECTION*0.4);
-                                axe1.SetAxeSpeed(MAX_AXE_SPEED*4);
-                                bStartNextPhase = false;
-                                break;
-                            case Phase::TWO:
-                                //do stuff
-                                bStartNextPhase = false;
-                                break;
-                            case Phase::THREE:
-                                //do stuff
-                                bStartNextPhase = false;
-                                break;
-                            case Phase::FOUR:
-                                //do stuff
-                                bStartNextPhase = false;
-                                break;
-                            default:
-                                //do stuff
-                                break;
-                        }   
+                        //execute queue changes set by gamePhase
+                        axe1.ExecuteAxeQueue();
                     }
-                    //should prob reset PosY also, then set size, speed, and direction
-                    //based off the phase timer
-                    axe1.ResetPos();
-                    axe1.SetAxeOffscreen(false);
+                    else
+                    {
+                        //should prob reset PosY also, then set size, speed, and direction
+                        //based off the phase timer
+                        axe1.ResetPos();
+                        axe1.SetAxeOffscreen(false);
+                    }
+                    
                 }
                 
                 //move the axes
                 axe1.UpdatePosition();
                 axe2.UpdatePosition();
                 axe3.UpdatePosition();
+                axe4.UpdatePosition();
+                axe5.UpdatePosition();
+                axe6.UpdatePosition();
+                axe7.UpdatePosition();
+                axe8.UpdatePosition();
+                axe9.UpdatePosition();
+                axe10.UpdatePosition();
 
                 //determine axe directon and speed
                 if(axe1.IsOutofBounds(sizeY, 0))
@@ -418,6 +468,13 @@ int main()
                 axe1.UpdateCollisions();
                 axe2.UpdateCollisions();
                 axe3.UpdateCollisions();
+                axe4.UpdateCollisions();
+                axe5.UpdateCollisions();
+                axe6.UpdateCollisions();
+                axe7.UpdateCollisions();
+                axe8.UpdateCollisions();
+                axe9.UpdateCollisions();
+                axe10.UpdateCollisions();
 
                 //check for collisions only when circle can potentially overlap with axe vertically
                 if(circleRightEdge > axe1.GetAxeLeftEdge() && circleLeftEdge < axe1.GetAxeRightEdge())
