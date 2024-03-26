@@ -13,10 +13,10 @@ Needs a win condition, like maybe after x time passes, then you win.
 I think I can now see the end in sight for how to conclude working on this:
 
 -Add a victory screen after x time passes: player can try again, or exit program
--Reset timer on game over and logic to reset other stuff too
+X-Reset timer on game over and logic to reset other stuff too
 -Add some music while playing
 X-change color of player to some kind of bright silver
--add phases to game e.g. every 10 seconds the pattern of the axes change; add a max of 10 axes
+X-add phases to game e.g. every 10 seconds the pattern of the axes change; add a max of 10 axes
 -each phase change axe size, direction; maybe color too to differentiate the type of axe
 X-axes should move from right to left, and return back to right side after reaching -x value
 -make last phase like the scene from resident evil in the laser hallway
@@ -170,6 +170,8 @@ public:
         axeX = ix;
         axeY = iy;
         axeDirection = id;
+        axeSpeed = is;
+        bOffscreen = true;
     }
     void ResetPos() { axeX = ix; axeY = iy; }
 };
@@ -194,16 +196,16 @@ int main()
     int MAX_AXE_WIDTH = 120, MIN_AXE_WIDTH = 4; //horizontal size
     float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-1.0 is too fast, -0.08 feels too slow
     int MAX_AXE_DIRECTION = 10;
-    Axe axe1(MAX_AXE_WIDTH-100, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH), 0, 0, 0);
-    Axe axe2(MAX_AXE_WIDTH-80, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*2), 0, 0, 0);
-    Axe axe3(MIN_AXE_WIDTH-60, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*3), 0, 0, 0);
-    Axe axe4(MIN_AXE_WIDTH-40, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*4), 0, 0, 0);
-    Axe axe5(MIN_AXE_WIDTH-20, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*5), 0, 0, 0);
-    Axe axe6(MIN_AXE_WIDTH-100, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH), sizeY, 0, 0);
-    Axe axe7(MIN_AXE_WIDTH-80, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*2), sizeY, 0, 0);
-    Axe axe8(MIN_AXE_WIDTH-60, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*3), sizeY, 0, 0);
-    Axe axe9(MIN_AXE_WIDTH-40, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*4), sizeY, 0, 0);
-    Axe axe10(MIN_AXE_WIDTH-20, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*5), sizeY, 0, 0);
+    Axe axe1(MAX_AXE_WIDTH-100, AXE_SIZE, sizeX+MIN_AXE_WIDTH, 0, 0, 0);
+    Axe axe2(MAX_AXE_WIDTH-80, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, 0, 0, 0);
+    Axe axe3(MAX_AXE_WIDTH-60, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, 0, 0, 0);
+    Axe axe4(MAX_AXE_WIDTH-40, AXE_SIZE, sizeX+MIN_AXE_WIDTH*4, 0, 0, 0);
+    Axe axe5(MAX_AXE_WIDTH-20, AXE_SIZE, sizeX+MIN_AXE_WIDTH*5, 0, 0, 0);
+    Axe axe6(MAX_AXE_WIDTH-100, AXE_SIZE, sizeX+MIN_AXE_WIDTH, sizeY, 0, 0);
+    Axe axe7(MAX_AXE_WIDTH-80, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, sizeY, 0, 0);
+    Axe axe8(MAX_AXE_WIDTH-60, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, sizeY, 0, 0);
+    Axe axe9(MAX_AXE_WIDTH-40, AXE_SIZE, sizeX+MIN_AXE_WIDTH*4, sizeY, 0, 0);
+    Axe axe10(MAX_AXE_WIDTH-20, AXE_SIZE, sizeX+MIN_AXE_WIDTH*5, sizeY, 0, 0);
     Color axeColor{150, 190, 130, 255};
 
     // game vars | {} is called braced initialization
@@ -237,7 +239,7 @@ int main()
                        
 
 
-            //game proceeds until timer done
+            //game proceeds until timer done or game over
             if(bCollisionWithAxe)
             {
                 // game over
@@ -245,11 +247,23 @@ int main()
                 DrawText("Press 'Enter' to retry", sizeX/3, int(float(sizeY)*0.75), gameOverFontSize/2, BLACK);
                 if(IsKeyDown(KEY_ENTER))
                 {
-                    //reset all object positions
+                    //reset objects
                     circleX = circleInitialX; circleY = circleInitialY;
                     axe1.Reset();
                     axe2.Reset();
                     axe3.Reset();
+                    axe4.Reset();
+                    axe5.Reset();
+                    axe6.Reset();
+                    axe7.Reset();
+                    axe8.Reset();
+                    axe9.Reset();
+                    axe10.Reset();
+
+                    //reset game vars
+                    StartTimer(&gameTime, 60.0);
+                    gamePhase = Phase::ONE;
+                    bStartNextPhase = true;
                     bCollisionWithAxe = false;
                 }
             }
@@ -346,7 +360,7 @@ int main()
                     }
                     //should prob reset PosY also, then set size, speed, and direction
                     //based off the phase timer
-                    axe1.ResetPos();                    
+                    axe1.ResetPos();
                     axe1.SetAxeOffscreen(false);
                 }
                 
@@ -382,6 +396,14 @@ int main()
                 if((IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) && circleX > 0)
                 {
                     circleX -= 5;
+                }
+                if((IsKeyDown(KEY_KP_2) || IsKeyDown(KEY_TWO)) && circleY < sizeY+int(circleSize*0.7))
+                {
+                    circleY += 5; //down
+                }
+                if((IsKeyDown(KEY_KP_8) || IsKeyDown(KEY_EIGHT)) && circleY > -int(circleSize*0.7))
+                {
+                    circleY -= 5; //up
                 }
 
                 //update collision positions
