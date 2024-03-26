@@ -18,7 +18,7 @@ I think I can now see the end in sight for how to conclude working on this:
 X-change color of player to some kind of bright silver
 -add phases to game e.g. every 10 seconds the pattern of the axes change; add a max of 10 axes
 -each phase change axe size, direction; maybe color too to differentiate the type of axe
--axes should move from right to left, and return back to right side after reaching -x value
+X-axes should move from right to left, and return back to right side after reaching -x value
 -make last phase like the scene from resident evil in the laser hallway
 -maybe I troll and player has to cheat to win, meaning 
     you have to go above the visible portion of the window
@@ -70,6 +70,9 @@ bool IsTimerDoneOld(Timer timer)
     return GetTime() - timer.startTime >= timer.lifeTime;
 }
 
+//enum class tips from: https://stackoverflow.com/questions/12183008/how-to-use-enums-in-c
+enum class Phase { ONE, TWO, THREE, FOUR };
+
 //the rectangles, but as a class
 class Axe
 {
@@ -95,7 +98,7 @@ public:
         axeRightEdge = axeX + axeSizeX;
         axeTopEdge = axeY;
         axeBotEdge = axeY + axeSizeY;
-        bOffscreen = false;
+        bOffscreen = true;
     }
     Axe(int sizeX, int sizeY, int posX, int posY, int dir, float spd)
     {
@@ -110,7 +113,7 @@ public:
         axeRightEdge = axeX + axeSizeX;
         axeTopEdge = axeY;
         axeBotEdge = axeY + axeSizeY;
-        bOffscreen = false;
+        bOffscreen = true;
     }
     double GetAxeX() { return axeX; }
     int GetAxeY() { return axeY; }
@@ -121,9 +124,10 @@ public:
     int GetAxeTopEdge() { return axeTopEdge; }
     int GetAxeBotEdge() { return axeBotEdge; }
     int GetAxeDirection() { return axeDirection; }
-    bool GetAxeOffscreen() { return bOffscreen; }
     float GetAxeSpeed() { return axeSpeed; }
+    bool GetAxeOffscreen() { return bOffscreen; }    
     void SetAxeDirection(int newDirection) { axeDirection = newDirection; }
+    void SetAxeSpeed(float newSpeed) { axeSpeed = newSpeed; }
     void SetAxeOffscreen(bool val) { bOffscreen = val; }
     bool IsOutofBounds(int upperBounds, int lowerBounds)
     {
@@ -167,10 +171,7 @@ public:
         axeY = iy;
         axeDirection = id;
     }
-    void ResetPosX()
-    {
-        axeX = ix;
-    }
+    void ResetPos() { axeX = ix; axeY = iy; }
 };
 
 int main()
@@ -188,18 +189,28 @@ int main()
     int circleBotEdge{circleY+int(circleSize)};
     Color playerColor{200, 210, 190, 255};
 
-    // axes info
+    // axes info | 1-5 start at top of screen, 6-10 start at bottom
     int AXE_SIZE = 60; //vertical size
     int MAX_AXE_WIDTH = 120, MIN_AXE_WIDTH = 4; //horizontal size
     float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-1.0 is too fast, -0.08 feels too slow
-    Axe axe1(30, 50, int(sizeX+10), 0, 10, MAX_AXE_SPEED*4); //sizeX*0.8
-    Axe axe2(MAX_AXE_WIDTH, AXE_SIZE, int(sizeX*0.25), 0, 6, MAX_AXE_SPEED);
-    Axe axe3(MIN_AXE_WIDTH, AXE_SIZE, int(sizeX*0.6), sizeY-60, -10, MIN_AXE_SPEED);
+    int MAX_AXE_DIRECTION = 10;
+    Axe axe1(MAX_AXE_WIDTH-100, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH), 0, 0, 0);
+    Axe axe2(MAX_AXE_WIDTH-80, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*2), 0, 0, 0);
+    Axe axe3(MIN_AXE_WIDTH-60, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*3), 0, 0, 0);
+    Axe axe4(MIN_AXE_WIDTH-40, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*4), 0, 0, 0);
+    Axe axe5(MIN_AXE_WIDTH-20, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*5), 0, 0, 0);
+    Axe axe6(MIN_AXE_WIDTH-100, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH), sizeY, 0, 0);
+    Axe axe7(MIN_AXE_WIDTH-80, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*2), sizeY, 0, 0);
+    Axe axe8(MIN_AXE_WIDTH-60, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*3), sizeY, 0, 0);
+    Axe axe9(MIN_AXE_WIDTH-40, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*4), sizeY, 0, 0);
+    Axe axe10(MIN_AXE_WIDTH-20, AXE_SIZE, int(sizeX+MIN_AXE_WIDTH*5), sizeY, 0, 0);
     Color axeColor{150, 190, 130, 255};
 
-    // game vars {} is called braced initialization
+    // game vars | {} is called braced initialization
     Timer gameTime;    
+    Phase gamePhase = Phase::ONE;
     bool bCollisionWithAxe{false};
+    bool bStartNextPhase{true};
     int gameOverFontSize = 40;
 
     InitWindow(sizeX, sizeY, "me axe game");
@@ -267,7 +278,24 @@ int main()
                 DrawRectangle(axe3.GetAxeX(), axe3.GetAxeY(), axe3.GetAxeSizeX(), axe3.GetAxeSizeY(), axeColor);
 
 
-                //check phase based off timer.lifeTime
+                //check phase based off timer.lifeTime                
+                if(gameTime.lifeTime < 45.0 && gamePhase == Phase::ONE)
+                {
+                    //update axes with new phase data
+                    bStartNextPhase = true;
+
+                    gamePhase = Phase::TWO;
+                }
+                else if (gameTime.lifeTime < 30.0 && gamePhase == Phase::TWO)
+                {
+                    gamePhase = Phase::THREE;
+                }
+                else if (gameTime.lifeTime < 15.0 && gamePhase == Phase::THREE)
+                {
+                    gamePhase = Phase::FOUR;
+                }
+                //may need additional tweaking to times used to properly get the look for last phase ready
+
 
                 //check bOffscreen for axes to tell if they are offscreen
                 //when true then if the phase has changed then it can be updated
@@ -288,9 +316,37 @@ int main()
 
                 if(axe1.GetAxeOffscreen())
                 {
+                    //set size, direction, and speed for each phase
+                    if(bStartNextPhase)
+                    {
+                        switch (gamePhase)
+                        {
+                            case Phase::ONE:
+                                //do stuff
+                                axe1.SetAxeDirection(MAX_AXE_DIRECTION*0.4);
+                                axe1.SetAxeSpeed(MAX_AXE_SPEED*4);
+                                bStartNextPhase = false;
+                                break;
+                            case Phase::TWO:
+                                //do stuff
+                                bStartNextPhase = false;
+                                break;
+                            case Phase::THREE:
+                                //do stuff
+                                bStartNextPhase = false;
+                                break;
+                            case Phase::FOUR:
+                                //do stuff
+                                bStartNextPhase = false;
+                                break;
+                            default:
+                                //do stuff
+                                break;
+                        }   
+                    }
                     //should prob reset PosY also, then set size, speed, and direction
                     //based off the phase timer
-                    axe1.ResetPosX();                    
+                    axe1.ResetPos();                    
                     axe1.SetAxeOffscreen(false);
                 }
                 
@@ -304,7 +360,7 @@ int main()
                 {
                     axe1.SetAxeDirection(-axe1.GetAxeDirection());
                 }
-                if(axe1.IsOffscreen(-MAX_AXE_WIDTH))
+                if(axe1.IsOffscreen(-axe1.GetAxeSizeX()))
                 {
                     axe1.SetAxeOffscreen(true);
                 }
