@@ -14,7 +14,10 @@ I think I can now see the end in sight for how to conclude working on this:
 
 -Add a victory screen after x time passes: player can try again, or exit program
 X-Reset timer on game over and logic to reset other stuff too
--Add some music while playing
+X-Add some music while playing
+-when hit add a sound effect, followed by defeat music that loops, add a sound
+    for when pressing enter to restart as well. Finally, add some victory music
+    as well!
 X-change color of player to some kind of bright silver
 X-add phases to game e.g. every 10 seconds the pattern of the axes change; add a max of 10 axes
 -each phase change axe size, direction; maybe color too to differentiate the type of axe
@@ -243,7 +246,13 @@ int main()
 
     InitWindow(sizeX, sizeY, "me axe game");
     SetTargetFPS(60);
+    InitAudioDevice();    
     StartTimer(&gameTime, 60.0);
+
+    //play background music
+    Sound gameMusic = LoadSound("8bit_adventure.mp3");
+    SetSoundVolume(gameMusic, 0.75);
+    PlaySound(gameMusic);
 
     while (!WindowShouldClose())
     {
@@ -510,4 +519,6 @@ int main()
         EndDrawing();
     }
 
+    //audio info from: https://www.youtube.com/watch?v=o8ToPNxgs5U
+    CloseAudioDevice();
 }
