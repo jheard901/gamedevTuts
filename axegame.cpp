@@ -15,7 +15,7 @@ I think I can now see the end in sight for how to conclude working on this:
 -Add a victory screen after x time passes: player can try again, or exit program
 X-Reset timer on game over and logic to reset other stuff too
 X-Add some music while playing
--when hit add a sound effect, followed by defeat music that loops, add a sound
+-when player hit add a sound effect, followed by defeat music that loops, add a sound
     for when pressing enter to restart as well. Finally, add some victory music
     as well!
 X-change color of player to some kind of bright silver
@@ -223,8 +223,8 @@ int main()
     // axes info | 1-5 start at top of screen, 6-10 start at bottom
     int AXE_SIZE = 60; //vertical size
     int MAX_AXE_WIDTH = 120, MIN_AXE_WIDTH = 4; //horizontal size
-    float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-1.0 is too fast, -0.08 feels too slow
-    int MAX_AXE_DIRECTION = 10;
+    float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-0.3 since -1.0 is too fast, -0.08 feels too slow
+    int MAX_AXE_DIRECTION = 10; //10 but 20 may be better to use
     Axe axe1(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH, 0, 0, 0);
     Axe axe2(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, 0, 0, 0);
     Axe axe3(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*3, 0, 0, 0);
@@ -369,15 +369,18 @@ int main()
                 //once axe is offscreen it can be updated to match
                 //size/speed for its next phase
 
-                //set size, direction, and speed for each phase
+                //set axe size, direction, and speed for each phase
                 if(bStartNextPhase)
                 {
                     switch (gamePhase)
                     {
                         case Phase::ONE:
                             //do stuff
-                            axe1.SetAxeQueue(MAX_AXE_WIDTH-40, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*4);
-                            
+                            axe1.SetAxeQueue(MAX_AXE_WIDTH-70, MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*2);
+                            axe2.SetAxeQueue(MAX_AXE_WIDTH-20, MAX_AXE_DIRECTION*0.3, MIN_AXE_SPEED*3);
+                            axe6.SetAxeQueue(MAX_AXE_WIDTH-70, -MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*2);
+                            axe7.SetAxeQueue(MAX_AXE_WIDTH-20, -MAX_AXE_DIRECTION*0.5, MIN_AXE_SPEED*4);
+
                             bStartNextPhase = false;
                             break;
                         case Phase::TWO:
@@ -399,6 +402,12 @@ int main()
                     }   
                 }
 
+                //may need to add a phase five that doesn't trigger until after x time remaining and
+                //all axes are offscreen. Then, the axes can execute queue changes so they are released
+                //at the same time so you get that look of them all being released side by side
+
+                //may need to even update time to survive from 60 to something higher. we'll see...
+
                 if(axe1.GetAxeOffscreen())
                 {
                     if(axe1.IsQueued())
@@ -415,6 +424,42 @@ int main()
                     }
                     
                 }
+                if(axe2.GetAxeOffscreen())
+                {
+                    if(axe2.IsQueued())
+                    {
+                        axe2.ExecuteAxeQueue();
+                    }
+                    else
+                    {
+                        axe2.ResetPos();
+                        axe2.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe6.GetAxeOffscreen())
+                {
+                    if(axe6.IsQueued())
+                    {
+                        axe6.ExecuteAxeQueue();
+                    }
+                    else
+                    {
+                        axe6.ResetPos();
+                        axe6.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe7.GetAxeOffscreen())
+                {
+                    if(axe7.IsQueued())
+                    {
+                        axe7.ExecuteAxeQueue();
+                    }
+                    else
+                    {
+                        axe7.ResetPos();
+                        axe7.SetAxeOffscreen(false);
+                    }
+                }
                 
                 //move the axes
                 axe1.UpdatePosition();
@@ -428,7 +473,8 @@ int main()
                 axe9.UpdatePosition();
                 axe10.UpdatePosition();
 
-                //determine axe directon and speed
+
+                //set axe directon when it reaches the top/bot bounds, and notify when axe goes offscreen
                 if(axe1.IsOutofBounds(sizeY, 0))
                 {
                     axe1.SetAxeDirection(-axe1.GetAxeDirection());
@@ -442,12 +488,84 @@ int main()
                 {
                     axe2.SetAxeDirection(-axe2.GetAxeDirection());
                 }
+                if(axe2.IsOffscreen(-axe2.GetAxeSizeX()))
+                {
+                    axe2.SetAxeOffscreen(true);
+                }
+
                 if(axe3.IsOutofBounds(sizeY, 0))
                 {
                     axe3.SetAxeDirection(-axe3.GetAxeDirection());
                 }
+                if(axe3.IsOffscreen(-axe3.GetAxeSizeX()))
+                {
+                    axe3.SetAxeOffscreen(true);
+                }
 
-                //input to move circle and keep in window
+                if(axe4.IsOutofBounds(sizeY, 0))
+                {
+                    axe4.SetAxeDirection(-axe4.GetAxeDirection());
+                }
+                if(axe4.IsOffscreen(-axe4.GetAxeSizeX()))
+                {
+                    axe4.SetAxeOffscreen(true);
+                }
+
+                if(axe5.IsOutofBounds(sizeY, 0))
+                {
+                    axe5.SetAxeDirection(-axe5.GetAxeDirection());
+                }
+                if(axe5.IsOffscreen(-axe5.GetAxeSizeX()))
+                {
+                    axe5.SetAxeOffscreen(true);
+                }
+
+                if(axe6.IsOutofBounds(sizeY, 0))
+                {
+                    axe6.SetAxeDirection(-axe6.GetAxeDirection());
+                }
+                if(axe6.IsOffscreen(-axe6.GetAxeSizeX()))
+                {
+                    axe6.SetAxeOffscreen(true);
+                }
+
+                if(axe7.IsOutofBounds(sizeY, 0))
+                {
+                    axe7.SetAxeDirection(-axe7.GetAxeDirection());
+                }
+                if(axe7.IsOffscreen(-axe7.GetAxeSizeX()))
+                {
+                    axe7.SetAxeOffscreen(true);
+                }
+
+                if(axe8.IsOutofBounds(sizeY, 0))
+                {
+                    axe8.SetAxeDirection(-axe8.GetAxeDirection());
+                }
+                if(axe8.IsOffscreen(-axe8.GetAxeSizeX()))
+                {
+                    axe8.SetAxeOffscreen(true);
+                }
+
+                if(axe9.IsOutofBounds(sizeY, 0))
+                {
+                    axe9.SetAxeDirection(-axe9.GetAxeDirection());
+                }
+                if(axe9.IsOffscreen(-axe9.GetAxeSizeX()))
+                {
+                    axe9.SetAxeOffscreen(true);
+                }
+
+                if(axe10.IsOutofBounds(sizeY, 0))
+                {
+                    axe10.SetAxeDirection(-axe10.GetAxeDirection());
+                }
+                if(axe10.IsOffscreen(-axe10.GetAxeSizeX()))
+                {
+                    axe10.SetAxeOffscreen(true);
+                }
+
+                //input to move player and keep in window
                 if((IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) && circleX < sizeX)
                 {
                     circleX += 5;
@@ -464,6 +582,7 @@ int main()
                 {
                     circleY -= 5; //up
                 }
+
 
                 //update collision positions
 
@@ -485,6 +604,7 @@ int main()
                 axe9.UpdateCollisions();
                 axe10.UpdateCollisions();
 
+
                 //check for collisions only when circle can potentially overlap with axe vertically
                 if(circleRightEdge > axe1.GetAxeLeftEdge() && circleLeftEdge < axe1.GetAxeRightEdge())
                 {
@@ -505,6 +625,62 @@ int main()
                 if(circleRightEdge > axe3.GetAxeLeftEdge() && circleLeftEdge < axe3.GetAxeRightEdge())
                 {
                     if(circleTopEdge < axe3.GetAxeBotEdge() && circleBotEdge > axe3.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe4.GetAxeLeftEdge() && circleLeftEdge < axe4.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe4.GetAxeBotEdge() && circleBotEdge > axe4.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe5.GetAxeLeftEdge() && circleLeftEdge < axe5.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe5.GetAxeBotEdge() && circleBotEdge > axe5.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe6.GetAxeLeftEdge() && circleLeftEdge < axe6.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe6.GetAxeBotEdge() && circleBotEdge > axe6.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe7.GetAxeLeftEdge() && circleLeftEdge < axe7.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe7.GetAxeBotEdge() && circleBotEdge > axe7.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe8.GetAxeLeftEdge() && circleLeftEdge < axe8.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe8.GetAxeBotEdge() && circleBotEdge > axe8.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe9.GetAxeLeftEdge() && circleLeftEdge < axe9.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe9.GetAxeBotEdge() && circleBotEdge > axe9.GetAxeTopEdge())
+                    {
+                        bCollisionWithAxe = true;
+                    }
+                }
+
+                if(circleRightEdge > axe10.GetAxeLeftEdge() && circleLeftEdge < axe10.GetAxeRightEdge())
+                {
+                    if(circleTopEdge < axe10.GetAxeBotEdge() && circleBotEdge > axe10.GetAxeTopEdge())
                     {
                         bCollisionWithAxe = true;
                     }
