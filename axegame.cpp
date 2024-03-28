@@ -148,6 +148,8 @@ public:
     void SetAxeDirection(int newDirection) { axeDirection = newDirection; }
     void SetAxeSpeed(float newSpeed) { axeSpeed = newSpeed; }
     void SetAxeOffscreen(bool val) { bOffscreen = val; }
+    void SetAxePosition(int posY) {axeY = posY; }
+    void SetAxePosition(int posY, int posX) { axeY = posY; axeX = posX; }
     bool IsQueued() { return bQueued; }
     bool IsOutofBounds(int upperBounds, int lowerBounds)
     {
@@ -248,16 +250,26 @@ int main()
 
     // game vars | {} is called braced initialization
     Timer gameTime;    
-    Phase gamePhase = Phase::ONE;
+    Phase gamePhase = Phase::ONE; //for debug set to PHASE::THREE and StartTimer at 19.0
     bool bCollisionWithAxe{false};
     bool bStartNextPhase{true};
-    bool bDevMode{false};
+    bool bDevMode{true};
+    bool bInvincible{true};
     int gameOverFontSize = 40;
+    int PHASE_FOUR_BOUNDS = 40;
 
     InitWindow(sizeX, sizeY, "me axe game");
     SetTargetFPS(60);
     InitAudioDevice();    
     StartTimer(&gameTime, 63.0); //63.0 a quick fix to get desired effect for now
+
+    //devmode check to phase 4
+    //comment this out to check full game
+    if(bDevMode)
+    {
+        gamePhase = Phase::THREE;
+        StartTimer(&gameTime, 19.0);
+    }
 
     //play background music
     Sound gameMusic = LoadSound("8bit_adventure.mp3");
@@ -332,16 +344,34 @@ int main()
                 DrawCircle(circleX, circleY, circleSize, playerColor);
 
                 //the axes
-                DrawRectangle(axe1.GetAxeX(), axe1.GetAxeY(), axe1.GetAxeSizeX(), axe1.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe2.GetAxeX(), axe2.GetAxeY(), axe2.GetAxeSizeX(), axe2.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe3.GetAxeX(), axe3.GetAxeY(), axe3.GetAxeSizeX(), axe3.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe4.GetAxeX(), axe4.GetAxeY(), axe4.GetAxeSizeX(), axe4.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe5.GetAxeX(), axe5.GetAxeY(), axe5.GetAxeSizeX(), axe5.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe6.GetAxeX(), axe6.GetAxeY(), axe6.GetAxeSizeX(), axe6.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe7.GetAxeX(), axe7.GetAxeY(), axe7.GetAxeSizeX(), axe7.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe8.GetAxeX(), axe8.GetAxeY(), axe8.GetAxeSizeX(), axe8.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe9.GetAxeX(), axe9.GetAxeY(), axe9.GetAxeSizeX(), axe9.GetAxeSizeY(), axeColor);
-                DrawRectangle(axe10.GetAxeX(), axe10.GetAxeY(), axe10.GetAxeSizeX(), axe10.GetAxeSizeY(), axeColor);
+                if(bDevMode)
+                {
+                    DrawRectangle(axe1.GetAxeX(), axe1.GetAxeY(), axe1.GetAxeSizeX(), axe1.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe2.GetAxeX(), axe2.GetAxeY(), axe2.GetAxeSizeX(), axe2.GetAxeSizeY(), RED);
+                    DrawRectangle(axe3.GetAxeX(), axe3.GetAxeY(), axe3.GetAxeSizeX(), axe3.GetAxeSizeY(), GREEN);
+                    DrawRectangle(axe4.GetAxeX(), axe4.GetAxeY(), axe4.GetAxeSizeX(), axe4.GetAxeSizeY(), WHITE);
+                    DrawRectangle(axe5.GetAxeX(), axe5.GetAxeY(), axe5.GetAxeSizeX(), axe5.GetAxeSizeY(), BLACK);
+                    DrawRectangle(axe6.GetAxeX(), axe6.GetAxeY(), axe6.GetAxeSizeX(), axe6.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe7.GetAxeX(), axe7.GetAxeY(), axe7.GetAxeSizeX(), axe7.GetAxeSizeY(), RED);
+                    DrawRectangle(axe8.GetAxeX(), axe8.GetAxeY(), axe8.GetAxeSizeX(), axe8.GetAxeSizeY(), GREEN);
+                    DrawRectangle(axe9.GetAxeX(), axe9.GetAxeY(), axe9.GetAxeSizeX(), axe9.GetAxeSizeY(), WHITE);
+                    DrawRectangle(axe10.GetAxeX(), axe10.GetAxeY(), axe10.GetAxeSizeX(), axe10.GetAxeSizeY(), BLACK);
+
+                }
+                else
+                {
+                    DrawRectangle(axe1.GetAxeX(), axe1.GetAxeY(), axe1.GetAxeSizeX(), axe1.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe2.GetAxeX(), axe2.GetAxeY(), axe2.GetAxeSizeX(), axe2.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe3.GetAxeX(), axe3.GetAxeY(), axe3.GetAxeSizeX(), axe3.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe4.GetAxeX(), axe4.GetAxeY(), axe4.GetAxeSizeX(), axe4.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe5.GetAxeX(), axe5.GetAxeY(), axe5.GetAxeSizeX(), axe5.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe6.GetAxeX(), axe6.GetAxeY(), axe6.GetAxeSizeX(), axe6.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe7.GetAxeX(), axe7.GetAxeY(), axe7.GetAxeSizeX(), axe7.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe8.GetAxeX(), axe8.GetAxeY(), axe8.GetAxeSizeX(), axe8.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe9.GetAxeX(), axe9.GetAxeY(), axe9.GetAxeSizeX(), axe9.GetAxeSizeY(), axeColor);
+                    DrawRectangle(axe10.GetAxeX(), axe10.GetAxeY(), axe10.GetAxeSizeX(), axe10.GetAxeSizeY(), axeColor);
+                }
+                
 
                 //check phase based off timer.lifeTime                
                 if(gameTime.lifeTime < 45.0 && gamePhase == Phase::ONE)
@@ -419,19 +449,38 @@ int main()
 
                             bStartNextPhase = false;
                             break;
-                        case Phase::FOUR:
+                        case Phase::FOUR:                        
                             //do stuff
-                            axe1.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*6, MAX_AXE_SPEED*4);
-                            axe2.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
-                            axe3.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*3, MAX_AXE_SPEED*4);
-                            axe4.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*4, MAX_AXE_SPEED*4);
-                            axe5.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*5, MAX_AXE_SPEED*4);
-                            axe6.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*5, MAX_AXE_SPEED*4);
-                            axe7.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*4, MAX_AXE_SPEED*4);
-                            axe8.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*3, MAX_AXE_SPEED*4);
-                            axe9.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
-                            axe10.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*6, MAX_AXE_SPEED*4);
+                            
+                            if(!bDevMode)
+                            {
+                                axe1.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*6, MAX_AXE_SPEED*4);                            
+                                axe2.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);                            
+                                axe3.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*3, MAX_AXE_SPEED*4);                            
+                                axe4.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*4, MAX_AXE_SPEED*4);                            
+                                axe5.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*5, MAX_AXE_SPEED*4);                            
+                                axe6.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*5, MAX_AXE_SPEED*4);
+                                axe7.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*4, MAX_AXE_SPEED*4);
+                                axe8.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*3, MAX_AXE_SPEED*4);
+                                axe9.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
+                                axe10.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*6, MAX_AXE_SPEED*4);                            
+                            }
+                            else
+                            {
+                                //debug values
+                                axe1.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*4);                            
+                                axe2.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*4);                            
+                                axe3.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*0.3, MAX_AXE_SPEED*4);                            
+                                axe4.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*4);                            
+                                axe5.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*0.5, MAX_AXE_SPEED*4);                            
+                                axe6.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*0.5, MAX_AXE_SPEED*4);
+                                axe7.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*4);
+                                axe8.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*0.3, MAX_AXE_SPEED*4);
+                                axe9.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*4);
+                                axe10.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*4);
+                            }
 
+                            
                             bStartNextPhase = false;
                             break;
                         default:
@@ -446,7 +495,11 @@ int main()
 
                 //may need to even update time to survive from 60 to something higher. we'll see...
 
-                //axes start from top
+                //an axe offscreen refers to their x position being offscreen to the left (negative)
+                
+                
+                //SetAxePosition being debugged here
+                //seems like axes are always behind boundary in phase 4 for some reason
                 if(axe1.GetAxeOffscreen())
                 {
                     if(axe1.IsQueued())
@@ -456,18 +509,24 @@ int main()
                         {
                             //execute queue changes set by gamePhase
                             axe1.ExecuteAxeQueue();
+                            axe1.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::TWO)
                         {
                             axe1.ExecuteAxeQueue();
+                            axe1.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 30.0)
                         {
                             axe1.ExecuteAxeQueue();
+                            axe1.SetAxeOffscreen(false);
                         }                        
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
                         {
+                            axe1.ResetPos();
+                            axe1.SetAxePosition(PHASE_FOUR_BOUNDS);
                             axe1.ExecuteAxeQueue();
+                            axe1.SetAxeOffscreen(false);
                         }  
                     }
                     else
@@ -486,18 +545,24 @@ int main()
                         if(gamePhase == Phase::ONE && gameTime.lifeTime < 55.0)
                         {                            
                             axe2.ExecuteAxeQueue();
+                            axe2.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::TWO && gameTime.lifeTime < 44.0)
                         {                            
                             axe2.ExecuteAxeQueue();
+                            axe2.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 28.0)
                         {                            
                             axe2.ExecuteAxeQueue();
+                            axe2.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
-                        {                            
+                        {     
+                            axe2.ResetPos();                      
+                            axe2.SetAxePosition(PHASE_FOUR_BOUNDS+100); 
                             axe2.ExecuteAxeQueue();
+                            axe2.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -517,14 +582,19 @@ int main()
                         else if(gamePhase == Phase::TWO && gameTime.lifeTime < 42.0)
                         {                            
                             axe3.ExecuteAxeQueue();
+                            axe3.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 26.0)
                         {                            
                             axe3.ExecuteAxeQueue();
+                            axe3.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
-                        {                            
+                        {              
+                            axe3.ResetPos();
+                            axe3.SetAxePosition(PHASE_FOUR_BOUNDS+100);      
                             axe3.ExecuteAxeQueue();
+                            axe3.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -548,10 +618,22 @@ int main()
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 24.0)
                         {                            
                             axe4.ExecuteAxeQueue();
+                            axe4.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
-                        {                            
+                        {      
+                            //adding ResetPos() here fixed the problem because I don't know why but
+                            //the x position had a negative value causing it constantly fail the IsOffscreen()
+                            //check that was being done.
+
+                            //Now, need to fix the others to make sure X position is reset for those as well...
+                            //strangest thing is only axes 1-4 had issues with the x position while testing
+                            //in DevMode. 5-10 were working fine. Need to know why that was happening...
+                            
+                            axe4.ResetPos();                      
+                            axe4.SetAxePosition(PHASE_FOUR_BOUNDS+100);
                             axe4.ExecuteAxeQueue();
+                            axe4.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -577,8 +659,10 @@ int main()
                             //axe5.ExecuteAxeQueue();
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
-                        {                            
+                        {                     
+                            axe5.SetAxePosition(PHASE_FOUR_BOUNDS+100);       
                             axe5.ExecuteAxeQueue();
+                            axe5.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -595,18 +679,22 @@ int main()
                         if(gamePhase == Phase::ONE && gameTime.lifeTime < 56.0)
                         {                            
                             axe6.ExecuteAxeQueue();
+                            axe6.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::TWO)
                         {                            
                             axe6.ExecuteAxeQueue();
+                            axe6.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 30.0)
                         {                            
                             axe6.ExecuteAxeQueue();
+                            axe6.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
                         {                            
                             axe6.ExecuteAxeQueue();
+                            axe6.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -622,18 +710,22 @@ int main()
                         if(gamePhase == Phase::ONE && gameTime.lifeTime < 52.0)
                         {                            
                             axe7.ExecuteAxeQueue();
+                            axe7.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::TWO)
                         {                            
                             axe7.ExecuteAxeQueue();
+                            axe7.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 28.0)
                         {                            
                             axe7.ExecuteAxeQueue();
+                            axe7.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
                         {                            
                             axe7.ExecuteAxeQueue();
+                            axe7.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -653,14 +745,17 @@ int main()
                         else if(gamePhase == Phase::TWO && gameTime.lifeTime < 40.0)
                         {                            
                             axe8.ExecuteAxeQueue();
+                            axe8.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 26.0)
                         {                            
                             axe8.ExecuteAxeQueue();
+                            axe8.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
                         {                            
                             axe8.ExecuteAxeQueue();
+                            axe8.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -684,10 +779,12 @@ int main()
                         else if(gamePhase == Phase::THREE && gameTime.lifeTime < 24.0)
                         {                            
                             axe9.ExecuteAxeQueue();
+                            axe9.SetAxeOffscreen(false);
                         }
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
                         {                            
                             axe9.ExecuteAxeQueue();
+                            axe9.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -715,6 +812,7 @@ int main()
                         else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
                         {                            
                             axe10.ExecuteAxeQueue();
+                            axe10.SetAxeOffscreen(false);
                         }
                     }
                     else
@@ -738,7 +836,17 @@ int main()
 
 
                 //set axe directon when it reaches the top/bot bounds, and notify when axe goes offscreen
-                if(axe1.IsOutofBounds(sizeY, 0))
+                //queue check is done in case axe still onscreen, following else if check to check against original
+                //bounds of 0
+                if(axe1.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe1.SetAxeDirection(-axe1.GetAxeDirection());
+                }
+                else if(axe1.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe1.IsQueued())
+                {
+                    axe1.SetAxeDirection(-axe1.GetAxeDirection());
+                }
+                else if(axe1.IsOutofBounds(sizeY, 0))
                 {
                     axe1.SetAxeDirection(-axe1.GetAxeDirection());
                 }
@@ -747,7 +855,15 @@ int main()
                     axe1.SetAxeOffscreen(true);
                 }
 
-                if(axe2.IsOutofBounds(sizeY, 0))
+                if(axe2.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe2.SetAxeDirection(-axe2.GetAxeDirection());
+                }
+                else if(axe2.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe2.IsQueued())
+                {
+                    axe2.SetAxeDirection(-axe2.GetAxeDirection());
+                }
+                else if(axe2.IsOutofBounds(sizeY, 0))
                 {
                     axe2.SetAxeDirection(-axe2.GetAxeDirection());
                 }
@@ -756,7 +872,15 @@ int main()
                     axe2.SetAxeOffscreen(true);
                 }
 
-                if(axe3.IsOutofBounds(sizeY, 0))
+                if(axe3.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe3.SetAxeDirection(-axe3.GetAxeDirection());
+                }
+                else if(axe3.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe3.IsQueued())
+                {
+                    axe3.SetAxeDirection(-axe3.GetAxeDirection());
+                }
+                else if(axe3.IsOutofBounds(sizeY, 0))
                 {
                     axe3.SetAxeDirection(-axe3.GetAxeDirection());
                 }
@@ -765,7 +889,15 @@ int main()
                     axe3.SetAxeOffscreen(true);
                 }
 
-                if(axe4.IsOutofBounds(sizeY, 0))
+                if(axe4.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe4.SetAxeDirection(-axe4.GetAxeDirection());
+                }
+                else if(axe4.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe4.IsQueued())
+                {
+                    axe4.SetAxeDirection(-axe4.GetAxeDirection());
+                }
+                else if(axe4.IsOutofBounds(sizeY, 0))
                 {
                     axe4.SetAxeDirection(-axe4.GetAxeDirection());
                 }
@@ -774,7 +906,15 @@ int main()
                     axe4.SetAxeOffscreen(true);
                 }
 
-                if(axe5.IsOutofBounds(sizeY, 0))
+                if(axe5.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe5.SetAxeDirection(-axe5.GetAxeDirection());
+                }
+                else if(axe5.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe5.IsQueued())
+                {
+                    axe5.SetAxeDirection(-axe5.GetAxeDirection());
+                }
+                else if(axe5.IsOutofBounds(sizeY, 0))
                 {
                     axe5.SetAxeDirection(-axe5.GetAxeDirection());
                 }
@@ -783,7 +923,15 @@ int main()
                     axe5.SetAxeOffscreen(true);
                 }
 
-                if(axe6.IsOutofBounds(sizeY, 0))
+                if(axe6.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe6.SetAxeDirection(-axe6.GetAxeDirection());
+                }
+                else if(axe6.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe6.IsQueued())
+                {
+                    axe6.SetAxeDirection(-axe6.GetAxeDirection());
+                }
+                else if(axe6.IsOutofBounds(sizeY, 0))
                 {
                     axe6.SetAxeDirection(-axe6.GetAxeDirection());
                 }
@@ -792,7 +940,15 @@ int main()
                     axe6.SetAxeOffscreen(true);
                 }
 
-                if(axe7.IsOutofBounds(sizeY, 0))
+                if(axe7.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe7.SetAxeDirection(-axe7.GetAxeDirection());
+                }
+                else if(axe7.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe7.IsQueued())
+                {
+                    axe7.SetAxeDirection(-axe7.GetAxeDirection());
+                }
+                else if(axe7.IsOutofBounds(sizeY, 0))
                 {
                     axe7.SetAxeDirection(-axe7.GetAxeDirection());
                 }
@@ -801,7 +957,15 @@ int main()
                     axe7.SetAxeOffscreen(true);
                 }
 
-                if(axe8.IsOutofBounds(sizeY, 0))
+                if(axe8.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe8.SetAxeDirection(-axe8.GetAxeDirection());
+                }
+                else if(axe8.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe8.IsQueued())
+                {
+                    axe8.SetAxeDirection(-axe8.GetAxeDirection());
+                }
+                else if(axe8.IsOutofBounds(sizeY, 0))
                 {
                     axe8.SetAxeDirection(-axe8.GetAxeDirection());
                 }
@@ -810,7 +974,15 @@ int main()
                     axe8.SetAxeOffscreen(true);
                 }
 
-                if(axe9.IsOutofBounds(sizeY, 0))
+                if(axe9.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe9.SetAxeDirection(-axe9.GetAxeDirection());
+                }
+                else if(axe9.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe9.IsQueued())
+                {
+                    axe9.SetAxeDirection(-axe9.GetAxeDirection());
+                }
+                else if(axe9.IsOutofBounds(sizeY, 0))
                 {
                     axe9.SetAxeDirection(-axe9.GetAxeDirection());
                 }
@@ -819,7 +991,15 @@ int main()
                     axe9.SetAxeOffscreen(true);
                 }
 
-                if(axe10.IsOutofBounds(sizeY, 0))
+                if(axe10.IsOutofBounds(sizeY, 0) && gamePhase != Phase::FOUR)
+                {
+                    axe10.SetAxeDirection(-axe10.GetAxeDirection());
+                }
+                else if(axe10.IsOutofBounds(sizeY, PHASE_FOUR_BOUNDS) && gamePhase == Phase::FOUR && !axe10.IsQueued())
+                {
+                    axe10.SetAxeDirection(-axe10.GetAxeDirection());
+                }
+                else if(axe10.IsOutofBounds(sizeY, 0))
                 {
                     axe10.SetAxeDirection(-axe10.GetAxeDirection());
                 }
@@ -869,7 +1049,7 @@ int main()
 
 
                 //check for collisions only when circle can potentially overlap with axe vertically
-                if(!bDevMode)
+                if(!bInvincible)
                 {
                     if(circleRightEdge > axe1.GetAxeLeftEdge() && circleLeftEdge < axe1.GetAxeRightEdge())
                     {
