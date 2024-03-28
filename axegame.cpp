@@ -32,6 +32,15 @@ X-axes should move from right to left, and return back to right side after reach
     Would be cool if there was some kind of way to clue someone in
     to figuring out to use the numpad, like if we say "use directional
     input to move" in the rules without specifying WASD, or the arrows.
+
+
+NOTE: After setting a time for when axes should begin moving based off what is queued
+    for that phase, I noticed during debug compile and runs that the window gets drawn
+    rather slowly and the timer is already ticking before the window is completely drawn
+    and showing the player, which causes the logic to run before the player can see the
+    game. On a retry, it resets and functions correctly as it should. So maybe, need to
+    put a title screen or some sort when program first launches, and then player presses
+    enter or w/e to start playing and it shouldn't have that initial issue.
 */
 
 //a timer (from FAQ: https://github.com/raysan5/raylib/wiki/Frequently-Asked-Questions#how-do-i-make-a-timer)
@@ -223,7 +232,7 @@ int main()
     // axes info | 1-5 start at top of screen, 6-10 start at bottom
     int AXE_SIZE = 60; //vertical size
     int MAX_AXE_WIDTH = 120, MIN_AXE_WIDTH = 4; //horizontal size
-    float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-0.3 since -1.0 is too fast, -0.08 feels too slow
+    float MAX_AXE_SPEED = -0.3, MIN_AXE_SPEED = -0.12; //-0.3 * 4 feels like it should be the MIN, instead of -0.12
     int MAX_AXE_DIRECTION = 10; //10 but 20 may be better to use
     Axe axe1(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH, 0, 0, 0);
     Axe axe2(MAX_AXE_WIDTH, AXE_SIZE, sizeX+MIN_AXE_WIDTH*2, 0, 0, 0);
@@ -242,12 +251,13 @@ int main()
     Phase gamePhase = Phase::ONE;
     bool bCollisionWithAxe{false};
     bool bStartNextPhase{true};
+    bool bDevMode{false};
     int gameOverFontSize = 40;
 
     InitWindow(sizeX, sizeY, "me axe game");
     SetTargetFPS(60);
     InitAudioDevice();    
-    StartTimer(&gameTime, 60.0);
+    StartTimer(&gameTime, 63.0); //63.0 a quick fix to get desired effect for now
 
     //play background music
     Sound gameMusic = LoadSound("8bit_adventure.mp3");
@@ -343,10 +353,12 @@ int main()
                 }
                 else if (gameTime.lifeTime < 30.0 && gamePhase == Phase::TWO)
                 {
+                    bStartNextPhase = true;
                     gamePhase = Phase::THREE;
                 }
                 else if (gameTime.lifeTime < 15.0 && gamePhase == Phase::THREE)
                 {
+                    bStartNextPhase = true;
                     gamePhase = Phase::FOUR;
                 }
                 //may need additional tweaking to times used to properly get the look for last phase ready
@@ -376,24 +388,50 @@ int main()
                     {
                         case Phase::ONE:
                             //do stuff
-                            axe1.SetAxeQueue(MAX_AXE_WIDTH-70, MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*2);
-                            axe2.SetAxeQueue(MAX_AXE_WIDTH-20, MAX_AXE_DIRECTION*0.3, MIN_AXE_SPEED*3);
-                            axe6.SetAxeQueue(MAX_AXE_WIDTH-70, -MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*2);
-                            axe7.SetAxeQueue(MAX_AXE_WIDTH-20, -MAX_AXE_DIRECTION*0.5, MIN_AXE_SPEED*4);
+                            axe1.SetAxeQueue(MAX_AXE_WIDTH-80, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*4);
+                            axe2.SetAxeQueue(MAX_AXE_WIDTH-20, MAX_AXE_DIRECTION*0.3, MAX_AXE_SPEED*6);
+                            axe6.SetAxeQueue(MAX_AXE_WIDTH-80, -MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*4);
+                            axe7.SetAxeQueue(MAX_AXE_WIDTH-20, -MAX_AXE_DIRECTION*0.3, MAX_AXE_SPEED*6);
 
                             bStartNextPhase = false;
                             break;
                         case Phase::TWO:
                             //do stuff
-                            axe1.SetAxeQueue(MAX_AXE_WIDTH, MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
+                            axe1.SetAxeQueue(MAX_AXE_WIDTH-60, MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*4);
+                            axe2.SetAxeQueue(MAX_AXE_WIDTH-100, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*6);
+                            axe3.SetAxeQueue(MAX_AXE_WIDTH, MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*8);
+                            axe6.SetAxeQueue(MAX_AXE_WIDTH-60, -MAX_AXE_DIRECTION*0.6, MAX_AXE_SPEED*4);
+                            axe7.SetAxeQueue(MAX_AXE_WIDTH-100, -MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*6);
+                            axe8.SetAxeQueue(MAX_AXE_WIDTH, -MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*8);
+
                             bStartNextPhase = false;
                             break;
                         case Phase::THREE:
                             //do stuff
+                            axe1.SetAxeQueue(MAX_AXE_WIDTH-80, MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*8);
+                            axe2.SetAxeQueue(MAX_AXE_WIDTH-80, MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*8);
+                            axe3.SetAxeQueue(MAX_AXE_WIDTH-80, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*8);
+                            axe4.SetAxeQueue(MAX_AXE_WIDTH-80, MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*8);
+                            axe6.SetAxeQueue(MAX_AXE_WIDTH-80, -MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*8);
+                            axe7.SetAxeQueue(MAX_AXE_WIDTH-80, -MAX_AXE_DIRECTION*0.2, MAX_AXE_SPEED*8);
+                            axe8.SetAxeQueue(MAX_AXE_WIDTH-80, -MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*8);
+                            axe9.SetAxeQueue(MAX_AXE_WIDTH-80, -MAX_AXE_DIRECTION*0.4, MAX_AXE_SPEED*8);
+
                             bStartNextPhase = false;
                             break;
                         case Phase::FOUR:
                             //do stuff
+                            axe1.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*6, MAX_AXE_SPEED*4);
+                            axe2.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
+                            axe3.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*3, MAX_AXE_SPEED*4);
+                            axe4.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*4, MAX_AXE_SPEED*4);
+                            axe5.SetAxeQueue(MIN_AXE_WIDTH, MAX_AXE_DIRECTION*5, MAX_AXE_SPEED*4);
+                            axe6.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*5, MAX_AXE_SPEED*4);
+                            axe7.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*4, MAX_AXE_SPEED*4);
+                            axe8.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*3, MAX_AXE_SPEED*4);
+                            axe9.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*2, MAX_AXE_SPEED*4);
+                            axe10.SetAxeQueue(MIN_AXE_WIDTH, -MAX_AXE_DIRECTION*6, MAX_AXE_SPEED*4);
+
                             bStartNextPhase = false;
                             break;
                         default:
@@ -408,12 +446,29 @@ int main()
 
                 //may need to even update time to survive from 60 to something higher. we'll see...
 
+                //axes start from top
                 if(axe1.GetAxeOffscreen())
                 {
                     if(axe1.IsQueued())
                     {
-                        //execute queue changes set by gamePhase
-                        axe1.ExecuteAxeQueue();
+                        //can set time for when to release axe for each phase
+                        if(gamePhase == Phase::ONE && gameTime.lifeTime < 59.0)
+                        {
+                            //execute queue changes set by gamePhase
+                            axe1.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {
+                            axe1.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 30.0)
+                        {
+                            axe1.ExecuteAxeQueue();
+                        }                        
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {
+                            axe1.ExecuteAxeQueue();
+                        }  
                     }
                     else
                     {
@@ -428,7 +483,22 @@ int main()
                 {
                     if(axe2.IsQueued())
                     {
-                        axe2.ExecuteAxeQueue();
+                        if(gamePhase == Phase::ONE && gameTime.lifeTime < 55.0)
+                        {                            
+                            axe2.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO && gameTime.lifeTime < 44.0)
+                        {                            
+                            axe2.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 28.0)
+                        {                            
+                            axe2.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe2.ExecuteAxeQueue();
+                        }
                     }
                     else
                     {
@@ -436,11 +506,108 @@ int main()
                         axe2.SetAxeOffscreen(false);
                     }
                 }
+                if(axe3.GetAxeOffscreen())
+                {
+                    if(axe3.IsQueued())
+                    {
+                        if(gamePhase == Phase::ONE)
+                        {                            
+                            //axe3.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO && gameTime.lifeTime < 42.0)
+                        {                            
+                            axe3.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 26.0)
+                        {                            
+                            axe3.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe3.ExecuteAxeQueue();
+                        }
+                    }
+                    else
+                    {
+                        axe3.ResetPos();
+                        axe3.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe4.GetAxeOffscreen())
+                {
+                    if(axe4.IsQueued())
+                    {
+                        if(gamePhase == Phase::ONE)
+                        {                            
+                            //axe4.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {                            
+                            //axe4.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 24.0)
+                        {                            
+                            axe4.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe4.ExecuteAxeQueue();
+                        }
+                    }
+                    else
+                    {
+                        axe4.ResetPos();
+                        axe4.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe5.GetAxeOffscreen())
+                {
+                    if(axe5.IsQueued())
+                    {
+                        if(gamePhase == Phase::ONE)
+                        {                            
+                            //axe5.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {                            
+                            //axe5.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE)
+                        {                            
+                            //axe5.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe5.ExecuteAxeQueue();
+                        }
+                    }
+                    else
+                    {
+                        axe5.ResetPos();
+                        axe5.SetAxeOffscreen(false);
+                    }
+                }
+                //axes that start from bot
                 if(axe6.GetAxeOffscreen())
                 {
                     if(axe6.IsQueued())
                     {
-                        axe6.ExecuteAxeQueue();
+                        if(gamePhase == Phase::ONE && gameTime.lifeTime < 56.0)
+                        {                            
+                            axe6.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {                            
+                            axe6.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 30.0)
+                        {                            
+                            axe6.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe6.ExecuteAxeQueue();
+                        }
                     }
                     else
                     {
@@ -452,12 +619,108 @@ int main()
                 {
                     if(axe7.IsQueued())
                     {
-                        axe7.ExecuteAxeQueue();
+                        if(gamePhase == Phase::ONE && gameTime.lifeTime < 52.0)
+                        {                            
+                            axe7.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {                            
+                            axe7.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 28.0)
+                        {                            
+                            axe7.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe7.ExecuteAxeQueue();
+                        }
                     }
                     else
                     {
                         axe7.ResetPos();
                         axe7.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe8.GetAxeOffscreen())
+                {
+                    if(axe8.IsQueued())
+                    {
+                        if(gamePhase == Phase::ONE)
+                        {                            
+                            //axe8.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO && gameTime.lifeTime < 40.0)
+                        {                            
+                            axe8.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 26.0)
+                        {                            
+                            axe8.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe8.ExecuteAxeQueue();
+                        }
+                    }
+                    else
+                    {
+                        axe8.ResetPos();
+                        axe8.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe9.GetAxeOffscreen())
+                {
+                    if(axe9.IsQueued())
+                    {
+                        if(gamePhase == Phase::ONE)
+                        {                            
+                            //axe9.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {                            
+                            //axe9.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE && gameTime.lifeTime < 24.0)
+                        {                            
+                            axe9.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe9.ExecuteAxeQueue();
+                        }
+                    }
+                    else
+                    {
+                        axe9.ResetPos();
+                        axe9.SetAxeOffscreen(false);
+                    }
+                }
+                if(axe10.GetAxeOffscreen())
+                {
+                    if(axe10.IsQueued())
+                    {
+                        if(gamePhase == Phase::ONE)
+                        {                            
+                            //axe10.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::TWO)
+                        {                            
+                            //axe10.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::THREE)
+                        {                            
+                            //axe10.ExecuteAxeQueue();
+                        }
+                        else if(gamePhase == Phase::FOUR && gameTime.lifeTime < 10.0)
+                        {                            
+                            axe10.ExecuteAxeQueue();
+                        }
+                    }
+                    else
+                    {
+                        axe10.ResetPos();
+                        axe10.SetAxeOffscreen(false);
                     }
                 }
                 
@@ -606,85 +869,89 @@ int main()
 
 
                 //check for collisions only when circle can potentially overlap with axe vertically
-                if(circleRightEdge > axe1.GetAxeLeftEdge() && circleLeftEdge < axe1.GetAxeRightEdge())
+                if(!bDevMode)
                 {
-                    if(circleTopEdge < axe1.GetAxeBotEdge() && circleBotEdge > axe1.GetAxeTopEdge())
+                    if(circleRightEdge > axe1.GetAxeLeftEdge() && circleLeftEdge < axe1.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe1.GetAxeBotEdge() && circleBotEdge > axe1.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe2.GetAxeLeftEdge() && circleLeftEdge < axe2.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe2.GetAxeBotEdge() && circleBotEdge > axe2.GetAxeTopEdge())
+                    if(circleRightEdge > axe2.GetAxeLeftEdge() && circleLeftEdge < axe2.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe2.GetAxeBotEdge() && circleBotEdge > axe2.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe3.GetAxeLeftEdge() && circleLeftEdge < axe3.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe3.GetAxeBotEdge() && circleBotEdge > axe3.GetAxeTopEdge())
+                    if(circleRightEdge > axe3.GetAxeLeftEdge() && circleLeftEdge < axe3.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe3.GetAxeBotEdge() && circleBotEdge > axe3.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe4.GetAxeLeftEdge() && circleLeftEdge < axe4.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe4.GetAxeBotEdge() && circleBotEdge > axe4.GetAxeTopEdge())
+                    if(circleRightEdge > axe4.GetAxeLeftEdge() && circleLeftEdge < axe4.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe4.GetAxeBotEdge() && circleBotEdge > axe4.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe5.GetAxeLeftEdge() && circleLeftEdge < axe5.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe5.GetAxeBotEdge() && circleBotEdge > axe5.GetAxeTopEdge())
+                    if(circleRightEdge > axe5.GetAxeLeftEdge() && circleLeftEdge < axe5.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe5.GetAxeBotEdge() && circleBotEdge > axe5.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe6.GetAxeLeftEdge() && circleLeftEdge < axe6.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe6.GetAxeBotEdge() && circleBotEdge > axe6.GetAxeTopEdge())
+                    if(circleRightEdge > axe6.GetAxeLeftEdge() && circleLeftEdge < axe6.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe6.GetAxeBotEdge() && circleBotEdge > axe6.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe7.GetAxeLeftEdge() && circleLeftEdge < axe7.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe7.GetAxeBotEdge() && circleBotEdge > axe7.GetAxeTopEdge())
+                    if(circleRightEdge > axe7.GetAxeLeftEdge() && circleLeftEdge < axe7.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe7.GetAxeBotEdge() && circleBotEdge > axe7.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe8.GetAxeLeftEdge() && circleLeftEdge < axe8.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe8.GetAxeBotEdge() && circleBotEdge > axe8.GetAxeTopEdge())
+                    if(circleRightEdge > axe8.GetAxeLeftEdge() && circleLeftEdge < axe8.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe8.GetAxeBotEdge() && circleBotEdge > axe8.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe9.GetAxeLeftEdge() && circleLeftEdge < axe9.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe9.GetAxeBotEdge() && circleBotEdge > axe9.GetAxeTopEdge())
+                    if(circleRightEdge > axe9.GetAxeLeftEdge() && circleLeftEdge < axe9.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe9.GetAxeBotEdge() && circleBotEdge > axe9.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
-                }
 
-                if(circleRightEdge > axe10.GetAxeLeftEdge() && circleLeftEdge < axe10.GetAxeRightEdge())
-                {
-                    if(circleTopEdge < axe10.GetAxeBotEdge() && circleBotEdge > axe10.GetAxeTopEdge())
+                    if(circleRightEdge > axe10.GetAxeLeftEdge() && circleLeftEdge < axe10.GetAxeRightEdge())
                     {
-                        bCollisionWithAxe = true;
+                        if(circleTopEdge < axe10.GetAxeBotEdge() && circleBotEdge > axe10.GetAxeTopEdge())
+                        {
+                            bCollisionWithAxe = true;
+                        }
                     }
                 }
+                
             }
         }
         
